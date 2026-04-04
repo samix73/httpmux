@@ -87,14 +87,14 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, s.opts.shutdownTimeout)
 	defer cancel()
 
+	if err := s.httpServer.Shutdown(ctx); err != nil {
+		return fmt.Errorf("server.Server.Shutdown httpServer.Shutdown error: %w", err)
+	}
+
 	for _, fn := range s.shutdownFn {
 		if err := fn(ctx); err != nil {
 			slog.Error("server.Server.Shutdown fn", slog.String("error", err.Error()))
 		}
-	}
-
-	if err := s.httpServer.Shutdown(ctx); err != nil {
-		return fmt.Errorf("server.Server.Shutdown httpServer.Shutdown error: %w", err)
 	}
 
 	slog.Info("Shutdown completed")
